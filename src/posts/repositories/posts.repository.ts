@@ -16,13 +16,11 @@ export class PostsRepository {
     delete createPostDto.authorEmail;
 
     const user = await this.prisma.user.findUnique({
-      where: {
-        email: authorEmail,
-      },
+      where: { email: authorEmail },
     });
 
     if (!user) {
-      throw new NotFoundError('Author not found');
+      throw new NotFoundError('Author not found.');
     }
 
     const data: Prisma.PostCreateInput = {
@@ -53,9 +51,7 @@ export class PostsRepository {
 
   async findOne(id: number): Promise<PostEntity> {
     return this.prisma.post.findUnique({
-      where: {
-        id,
-      },
+      where: { id },
       include: {
         author: {
           select: {
@@ -68,19 +64,50 @@ export class PostsRepository {
   }
 
   async update(id: number, updatePostDto: UpdatePostDto): Promise<PostEntity> {
-    return this.prisma.post.update({
-      where: {
-        id,
+    const { authorEmail } = updatePostDto;
+
+    if (!authorEmail) {
+      return this.prisma.post.update({
+        data: updatePostDto,
+        where: { id },
+      });
+    }
+
+    delete updatePostDto.authorEmail;
+
+    const user = await this.prisma.user.findUnique({
+      where: { email: authorEmail },
+    });
+
+    if (!user) {
+      throw new NotFoundError('Author not found.');
+    }
+
+    const data: Prisma.PostUpdateInput = {
+      ...updatePostDto,
+      author: {
+        connect: {
+          email: authorEmail,
+        },
       },
-      data: updatePostDto,
+    };
+
+    return this.prisma.post.update({
+      where: { id },
+      data,
+      include: {
+        author: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
   }
 
   async remove(id: number): Promise<PostEntity> {
     return this.prisma.post.delete({
-      where: {
-        id,
-      },
+      where: { id },
     });
   }
 }
