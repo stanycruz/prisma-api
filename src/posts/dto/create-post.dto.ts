@@ -12,7 +12,7 @@ export class CreatePostDto {
   @IsOptional()
   content?: string;
 
-  @ApiProperty({ description: 'Author e-mail' })
+  @ApiProperty({ description: 'Author email' })
   @IsEmail()
   authorEmail: string;
 }
