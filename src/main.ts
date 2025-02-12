@@ -6,6 +6,7 @@ import { DatabaseInterceptor } from './common/errors/interceptors/database.inter
 import { NotFoundInterceptor } from './common/errors/interceptors/notfound.interceptor';
 import { UnauthorizedInterceptor } from './common/errors/interceptors/unauthorized.interceptor';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Response } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +18,10 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
+
+  app.getHttpAdapter().get('/', (req, res: Response) => {
+    res.redirect('/docs');
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
